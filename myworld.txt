@@ -2,56 +2,74 @@
 NUMPOLLIES 36
 
 // Floor
-0.0 0.0 4.0   0.0 1.0 0.0   texture kashi.jpg 0.0 6.0
-0.0 0.0 0.0   0.0 1.0 0.0   texture kashi.jpg 0.0 0.0
-3.0 0.0 0.0   0.0 1.0 0.0   texture kashi.jpg 6.0 0.0
-
-0.0 0.0 4.0   0.0 1.0 0.0   texture kashi.jpg 0.0 6.0
-3.0 0.0 4.0   0.0 1.0 0.0   texture kashi.jpg 6.0 6.0
-3.0 0.0 0.0   0.0 1.0 0.0   texture kashi.jpg 6.0 0.0
+-0.2 0.0 4.2   0.0 1.0 0.0   texture kashi.jpg 0.0 6.0
+-0.2 0.0 -0.2   0.0 1.0 0.0   texture kashi.jpg 0.0 0.0
+3.2 0.0 -0.2   0.0 1.0 0.0   texture kashi.jpg 6.0 0.0
+-0.2 0.0 4.2   0.0 1.0 0.0   texture kashi.jpg 0.0 6.0
+3.2 0.0 4.2   0.0 1.0 0.0   texture kashi.jpg 6.0 6.0
+3.2 0.0 -0.2   0.0 1.0 0.0   texture kashi.jpg 6.0 0.0
 
 
 // Ceiling
-0.0 3.0 4.0   0.0 1.0 0.0   texture ceiling.jpg 0.0 1.0
-0.0 3.0 0.0   0.0 1.0 0.0   texture ceiling.jpg 0.0 0.0
-3.0 3.0 0.0   0.0 1.0 0.0   texture ceiling.jpg 1.0 0.0
-
-0.0 3.0 4.0   0.0 1.0 0.0   texture ceiling.jpg 0.0 1.0
-3.0 3.0 4.0   0.0 1.0 0.0   texture ceiling.jpg 1.0 1.0
-3.0 3.0 0.0   0.0 1.0 0.0   texture ceiling.jpg 1.0 0.0
+-0.2 3.0 4.2    0.0 1.0 0.0   texture ceiling.jpg 0.0 1.0
+-0.2 3.0 -0.2   0.0 1.0 0.0   texture ceiling.jpg 0.0 0.0
+3.2 3.0 -0.2    0.0 1.0 0.0   texture ceiling.jpg 1.0 0.0
+-0.2 3.0 4.2    0.0 1.0 0.0   texture ceiling.jpg 0.0 1.0
+3.2 3.0 4.2     0.0 1.0 0.0   texture ceiling.jpg 1.0 1.0
+3.2 3.0 -0.2    0.0 1.0 0.0   texture ceiling.jpg 1.0 0.0
 
 // Wall Left
-0.0 0.0 4.0   1.0 0.0 0.0   texture gach.jpg 0.0 4.0
-0.0 3.0 4.0   1.0 0.0 0.0   texture gach.jpg 3.0 4.0
-0.0 3.0 0.0   1.0 0.0 0.0   texture gach.jpg 3.0 0.0
-
-0.0 3.0 0.0   1.0 0.0 0.0   texture gach.jpg 3.0 0.0
-0.0 0.0 0.0   1.0 0.0 0.0   texture gach.jpg 0.0 0.0
-0.0 0.0 4.0   1.0 0.0 0.0   texture gach.jpg 0.0 4.0
+ 0.0 0.0 4.2   1.0 0.0 0.0   texture gach.jpg 0.0 4.0
+ 0.0 3.0 4.2   1.0 0.0 0.0   texture gach.jpg 3.0 4.0
+ 0.0 3.0 -0.2   1.0 0.0 0.0   texture gach.jpg 3.0 0.0
+ 0.0 3.0 -0.2   1.0 0.0 0.0   texture gach.jpg 3.0 0.0
+ 0.0 0.0 -0.2   1.0 0.0 0.0   texture gach.jpg 0.0 0.0
+ 0.0 0.0 4.2   1.0 0.0 0.0   texture gach.jpg 0.0 4.0
+-0.2 0.0 4.2   1.0 0.0 0.0   texture gach.jpg 0.0 4.0
+-0.2 3.0 4.2   1.0 0.0 0.0   texture gach.jpg 3.0 4.0
+-0.2 3.0 -0.2   1.0 0.0 0.0   texture gach.jpg 3.0 0.0
+-0.2 3.0 -0.2   1.0 0.0 0.0   texture gach.jpg 3.0 0.0
+-0.2 0.0 -0.2   1.0 0.0 0.0   texture gach.jpg 0.0 0.0
+-0.2 0.0 4.2   1.0 0.0 0.0   texture gach.jpg 0.0 4.0
 
 // Wall Right
-3.0 0.0 4.0   -1.0 0.0 0.0   texture gach.jpg 0.0 4.0
-3.0 3.0 4.0   -1.0 0.0 0.0   texture gach.jpg 3.0 4.0
-3.0 3.0 0.0   -1.0 0.0 0.0   texture gach.jpg 3.0 0.0
-
-3.0 3.0 0.0   -1.0 0.0 0.0   texture gach.jpg 3.0 0.0
-3.0 0.0 0.0   -1.0 0.0 0.0   texture gach.jpg 0.0 0.0
-3.0 0.0 4.0   -1.0 0.0 0.0   texture gach.jpg 0.0 4.0
+3.0 0.0 4.2   -1.0 0.0 0.0   texture gach.jpg 0.0 4.0
+3.0 3.0 4.2   -1.0 0.0 0.0   texture gach.jpg 3.0 4.0
+3.0 3.0 -0.2   -1.0 0.0 0.0   texture gach.jpg 3.0 0.0
+3.0 3.0 -0.2   -1.0 0.0 0.0   texture gach.jpg 3.0 0.0
+3.0 0.0 -0.2   -1.0 0.0 0.0   texture gach.jpg 0.0 0.0
+3.0 0.0 4.2   -1.0 0.0 0.0   texture gach.jpg 0.0 4.0
+3.2 0.0 4.2   -1.0 0.0 0.0   texture gach.jpg 0.0 4.0
+3.2 3.0 4.2   -1.0 0.0 0.0   texture gach.jpg 3.0 4.0
+3.2 3.0 -0.2   -1.0 0.0 0.0   texture gach.jpg 3.0 0.0
+3.2 3.0 -0.2   -1.0 0.0 0.0   texture gach.jpg 3.0 0.0
+3.2 0.0 -0.2   -1.0 0.0 0.0   texture gach.jpg 0.0 0.0
+3.2 0.0 4.2   -1.0 0.0 0.0   texture gach.jpg 0.0 4.0
 
 // Wall Back
-0.0 0.0 0.0   0.0 0.0 -1.0   texture gach.jpg 0.0 0.0
-3.0 0.0 0.0   0.0 0.0 -1.0   texture gach.jpg 0.0 3.0
-3.0 3.0 0.0   0.0 0.0 -1.0   texture gach.jpg 3.0 3.0
-
-3.0 3.0 0.0   0.0 0.0 -1.0   texture gach.jpg 3.0 3.0
-0.0 3.0 0.0   0.0 0.0 -1.0   texture gach.jpg 3.0 0.0
-0.0 0.0 0.0   0.0 0.0 -1.0   texture gach.jpg 0.0 0.0
+-0.2 0.0  0.0   0.0 0.0 -1.0   texture gach.jpg 0.0 0.0
+3.2 0.0  0.0   0.0 0.0 -1.0   texture gach.jpg 0.0 3.0
+3.2 3.0  0.0   0.0 0.0 -1.0   texture gach.jpg 3.0 3.0
+3.2 3.0  0.0   0.0 0.0 -1.0   texture gach.jpg 3.0 3.0
+-0.2 3.0  0.0   0.0 0.0 -1.0   texture gach.jpg 3.0 0.0
+-0.2 0.0  0.0   0.0 0.0 -1.0   texture gach.jpg 0.0 0.0
+-0.2 0.0 -0.2   0.0 0.0 -1.0   texture gach.jpg 0.0 0.0
+3.2 0.0 -0.2   0.0 0.0 -1.0   texture gach.jpg 0.0 3.0
+3.2 3.0 -0.2   0.0 0.0 -1.0   texture gach.jpg 3.0 3.0
+3.2 3.0 -0.2   0.0 0.0 -1.0   texture gach.jpg 3.0 3.0
+-0.2 3.0 -0.2   0.0 0.0 -1.0   texture gach.jpg 3.0 0.0
+-0.2 0.0 -0.2   0.0 0.0 -1.0   texture gach.jpg 0.0 0.0
 
 // Wall Front
-0.0 0.0 4.0   0.0 0.0 1.0   texture gach.jpg 0.0 0.0
-3.0 0.0 4.0   0.0 0.0 1.0   texture gach.jpg 0.0 3.0
-3.0 3.0 4.0   0.0 0.0 1.0   texture gach.jpg 3.0 3.0
-
-3.0 3.0 4.0   0.0 0.0 1.0   texture gach.jpg 3.0 3.0
-0.0 3.0 4.0   0.0 0.0 1.0   texture gach.jpg 3.0 0.0
-0.0 0.0 4.0   0.0 0.0 1.0   texture gach.jpg 0.0 0.0
+-0.2 0.0 4.0   0.0 0.0 1.0   texture gach.jpg 0.0 0.0
+3.2 0.0 4.0   0.0 0.0 1.0   texture gach.jpg 0.0 3.0
+3.2 3.0 4.0   0.0 0.0 1.0   texture gach.jpg 3.0 3.0
+3.2 3.0 4.0   0.0 0.0 1.0   texture gach.jpg 3.0 3.0
+-0.2 3.0 4.0   0.0 0.0 1.0   texture gach.jpg 3.0 0.0
+-0.2 0.0 4.0   0.0 0.0 1.0   texture gach.jpg 0.0 0.0
+-0.2 0.0 4.2   0.0 0.0 1.0   texture gach.jpg 0.0 0.0
+3.2 0.0 4.2   0.0 0.0 1.0   texture gach.jpg 0.0 3.0
+3.2 3.0 4.2   0.0 0.0 1.0   texture gach.jpg 3.0 3.0
+3.2 3.0 4.2   0.0 0.0 1.0   texture gach.jpg 3.0 3.0
+-0.2 3.0 4.2   0.0 0.0 1.0   texture gach.jpg 3.0 0.0
+-0.2 0.0 4.2   0.0 0.0 1.0   texture gach.jpg 0.0 0.0
