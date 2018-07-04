@@ -11,12 +11,12 @@ NUMPOLLIES 36
 
 
 // Ceiling
--0.2 3.0  4.2    0.0 1.0 0.0   texture ceiling.jpg 0.0 1.0
--0.2 3.0 -0.2    0.0 1.0 0.0   texture ceiling.jpg 0.0 0.0
- 3.2 3.0 -0.2    0.0 1.0 0.0   texture ceiling.jpg 1.0 0.0
--0.2 3.0  4.2    0.0 1.0 0.0   texture ceiling.jpg 0.0 1.0
- 3.2 3.0  4.2    0.0 1.0 0.0   texture ceiling.jpg 1.0 1.0
- 3.2 3.0 -0.2    0.0 1.0 0.0   texture ceiling.jpg 1.0 0.0
+-0.2 3.0  4.2    0.0 -1.0 0.0   texture ceiling.jpg 0.0 1.0
+-0.2 3.0 -0.2    0.0 -1.0 0.0   texture ceiling.jpg 0.0 0.0
+ 3.2 3.0 -0.2    0.0 -1.0 0.0   texture ceiling.jpg 1.0 0.0
+-0.2 3.0  4.2    0.0 -1.0 0.0   texture ceiling.jpg 0.0 1.0
+ 3.2 3.0  4.2    0.0 -1.0 0.0   texture ceiling.jpg 1.0 1.0
+ 3.2 3.0 -0.2    0.0 -1.0 0.0   texture ceiling.jpg 1.0 0.0
 
 // Wall Left
  0.0 0.0  4.2    1.0 0.0 0.0   texture gach.jpg 0.0 4.0
