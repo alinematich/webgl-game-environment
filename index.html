@@ -18,12 +18,32 @@
     uniform sampler2D uSampler;
 
     void main(void) {
-        vec3 ambientColor = vec3(0.2,0.2,0.2);
-        vec3 pointLightingColor = vec3(0.6, 0.6, 0.6);
-        vec3 pointLightingLocation = vec3(1.5, 2.6, 2.0);
-        vec3 lightDirection = normalize(pointLightingLocation - vPosition);
-        float directionalLightWeighting = max(dot(vTransformedNormal, lightDirection), 0.0);
-        vec3 lightWeighting = ambientColor + pointLightingColor * directionalLightWeighting;
+        vec3 ambientColor = vec3(0.6,0.6,0.6);
+
+        float a = 0.2;
+        float b = 0.2;
+        float c = 0.6;
+
+        vec3 pointLightingColor1 = vec3(255.0/255.0, 215.0/255.0, 0.0/255.0);
+        vec3 pointLightingLocation1 = vec3(1.5, 2.6, 3.0);
+        vec3 lightDirection1 = normalize(pointLightingLocation1 - vPosition);
+        float lightDistance1 = dot(lightDirection1, pointLightingLocation1 - vPosition);
+        float directionalLightWeighting1 = max(dot(vTransformedNormal, lightDirection1), 0.0)/(a*lightDistance1*lightDistance1 + b*lightDistance1 + c);
+
+        vec3 pointLightingColor2 = vec3(0.6, 0.6, 0.6);
+        vec3 pointLightingLocation2 = vec3(1.5, 2.6, 1.0);
+        vec3 lightDirection2 = normalize(pointLightingLocation2 - vPosition);
+        float lightDistance2 = dot(lightDirection2, pointLightingLocation2 - vPosition);
+        float directionalLightWeighting2 = max(dot(vTransformedNormal, lightDirection2), 0.0)/(a*lightDistance2*lightDistance2 + b*lightDistance2 + c);
+
+        vec3 pointLightingColor3 = 0.3 * vec3(255.0/255.0, 215.0/255.0, 0.0/255.0);
+        vec3 pointLightingLocation3 = vec3(-50.0, 50.0, -50.0);
+        vec3 lightDirection3 = normalize(pointLightingLocation3 - vec3(0.0,0.0,0.0));
+        //float lightDistance3 = dot(lightDirection3, pointLightingLocation3 - vPosition);
+        float directionalLightWeighting3 = max(dot(vTransformedNormal, lightDirection3), 0.0);
+        //directionalLightWeighting3 = 0.0;
+
+        vec3 lightWeighting = ambientColor + pointLightingColor1 * directionalLightWeighting1 + pointLightingColor2 * directionalLightWeighting2 + pointLightingColor3 * directionalLightWeighting3;
         
         vec4 fragmentColor = vVertexColor + texture2D(uSampler, vTextureCoord);
         gl_FragColor = vec4(fragmentColor.rgb * lightWeighting, fragmentColor.a);
@@ -63,17 +83,43 @@
 
     function initGL(canvas) {
         try {
-            // gl = canvas.getContext("experimental-webgl");
             gl = canvas.getContext("webgl2");
             gl.viewportWidth = canvas.width;
             gl.viewportHeight = canvas.height;
-        } catch (e) {
-        }
+        } catch (e) {}
         if (!gl) {
             alert("Could not initialise WebGL, sorry :-(");
         }
     }
 
+    class MyTime{
+
+        constructor() {
+            this.time = 0;
+            this.alert = new Audio("clock.wav")
+        }
+
+        getSeconds(){
+            return this.time/1000 - 3600 * Math.floor(this.getHours()) - 60 * Math.floor(this.getMinutes())
+        }
+
+        getMinutes(){
+            return this.time/60000 - 60 * Math.floor(this.getHours())
+        }
+        
+        getHours(){
+            return this.time/3600000
+        }
+
+    } 
+
+    var now = new MyTime();
+
+    setInterval(()=> {
+        now.time+=clockSpeed
+            if(now.time % 4320000 === 0) now.alert.play()
+        }, 10);
+    var clockSpeed = 10;
 
     function getShader(gl, id) {
         var shaderScript = document.getElementById(id);
@@ -201,7 +247,6 @@
         gl.uniformMatrix3fv(shaderProgram.nMatrixUniform, false, normalMatrix);
     }
 
-
     function degToRad(degrees) {
         return degrees * Math.PI / 180;
     }
@@ -209,6 +254,7 @@
     var currentlyPressedKeys = {};
 
     function handleKeyDown(event) {
+        // console.log (event.keyCode)
         currentlyPressedKeys[event.keyCode] = true;
     }
 
@@ -217,52 +263,88 @@
     }
 
 
-    var pitch = -0.3;
+    var pitch = 0;
     var pitchRate = 0;
 
     var yaw = 0;
     var yawRate = 0;
+    var centralYaw = 0;
 
     var myHeight = 1;
     var xPos = 1;
     var yPos = myHeight;
     var zPos = 1;
+    var isJumping = false;
+    var jumpStat = 0;
 
     var speed = 0;
+    var xSpeed =0;
 
     function handleKeys() {
-        if (currentlyPressedKeys[33]) {
-            // Page Up
-            pitchRate = 0.1;
-        } else if (currentlyPressedKeys[34]) {
-            // Page Down
-            pitchRate = -0.1;
-        } else {
-            pitchRate = 0;
-        }
-
-        if (currentlyPressedKeys[37] || currentlyPressedKeys[65]) {
-            // Left cursor key or A
-            yawRate = 0.1;
-        } else if (currentlyPressedKeys[39] || currentlyPressedKeys[68]) {
-            // Right cursor key or D
-            yawRate = -0.1;
-        } else {
+        if(currentlyPressedKeys[69] || currentlyPressedKeys[81]){
+            if(currentlyPressedKeys[69]) yawRate = -0.1
+            if(currentlyPressedKeys[81]) yawRate = 0.1
+        }else{
             yawRate = 0;
         }
 
+        if (currentlyPressedKeys[37] || currentlyPressedKeys[65]) {
+            if(currentlyPressedKeys[16]) xSpeed = 0.006;
+            else xSpeed = 0.003;
+        } else if (currentlyPressedKeys[39] || currentlyPressedKeys[68]) {
+            if(currentlyPressedKeys[16]) xSpeed = -0.006;
+            else xSpeed = -0.003;
+        } else {
+            xSpeed = 0;
+        }
+
+        if(currentlyPressedKeys[70]) {
+            if(currentlyPressedKeys[16]) clockSpeed = 10000
+            else clockSpeed = 400000
+        }else clockSpeed = 10;
+
         if (currentlyPressedKeys[38] || currentlyPressedKeys[87]) {
-            // Up cursor key or W
-            speed = 0.003;
+            if(currentlyPressedKeys[16]) speed = 0.006;
+            else speed = 0.003;
         } else if (currentlyPressedKeys[40] || currentlyPressedKeys[83]) {
-            // Down cursor key
-            speed = -0.003;
+            if(currentlyPressedKeys[16]) speed = -0.006;
+            else speed = -0.003;
         } else {
             speed = 0;
         }
 
+        if(currentlyPressedKeys[32] && !isJumping){
+            isJumping = true;
+            let jumpStat1 = 0;
+            let interval;
+            const jump = ()=>{
+                if(jumpStat1 > Math.PI) {
+                    clearInterval(interval);
+                    jumpStat = 0;
+                    yPos = myHeight;
+                    isJumping = false;
+                }
+                jumpStat1 += 0.1;
+                jumpStat = Math.sin(jumpStat1);
+            }
+            interval = setInterval(jump, 10);
+        }
+        
+        if(!isJumping){
+        if(currentlyPressedKeys[67]){
+            yPos = myHeight / 2;
+        } else {
+            yPos = myHeight;
+        }}
+
     }
 
+    function handleMouseMove(event) {
+        let x = -(event.x / 1500 - 0.5);
+        let y = -(event.y / 800 - 0.5);
+        yaw = centralYaw + x * 300
+        pitch = y * 150
+    }
 
     var worldVertexPositionBuffer = null;
     var worldVertexTextureCoordBuffer = null;
@@ -336,7 +418,6 @@
 
         worldVertexTextureIndexes = vertexTextureIndexes;
 
-        document.getElementById("loadingtext").textContent = "";
     }
 
 
@@ -361,13 +442,13 @@
             return;
         }
 
-        mat4.perspective(95, gl.viewportWidth / gl.viewportHeight, 0.01, 100.0, pMatrix);
+        mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.01, 250.0, pMatrix);
 
         mat4.identity(mvMatrix);
 
         mat4.rotate(mvMatrix, degToRad(-pitch), [1, 0, 0]);
         mat4.rotate(mvMatrix, degToRad(-yaw), [0, 1, 0]);
-        mat4.translate(mvMatrix, [-xPos, -yPos, -zPos]);
+        mat4.translate(mvMatrix, [-xPos, -yPos - jumpStat, -zPos]);
         
         
         gl.bindBuffer(gl.ARRAY_BUFFER, worldVertexTextureCoordBuffer);
@@ -395,11 +476,232 @@
             gl.drawArrays(gl.TRIANGLES, i, sameTexture);
             i += sameTexture - 1;
         }
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, clockVertexPositionBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([ ...clockVertexPositionBuffer.vertices,
+            1.2, 1.7, 3.98,
+            1.2 -0.16*Math.sin(now.getSeconds()* 2*Math.PI/60), 1.7  + 0.16 * Math.cos(now.getSeconds()* 2*Math.PI/60), 3.98,
+            1.2, 1.7, 3.98,
+            1.2 -0.14*Math.sin(now.getMinutes()* 2*Math.PI/60), 1.7  + 0.14 * Math.cos(now.getMinutes()* 2*Math.PI/60), 3.98,
+            1.2, 1.7, 3.98,
+            1.2 -0.10*Math.sin(now.getHours()* 2*Math.PI/12), 1.7  + 0.10 * Math.cos(now.getHours()* 2*Math.PI/12), 3.98,
+        ]), gl.STATIC_DRAW);
+        gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, clockVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, clockVertexTextureCoordBuffer);
+        gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, clockVertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, clockVertexNormalVectorBuffer);
+        gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, clockVertexNormalVectorBuffer.itemSize, gl.FLOAT, false, 0, 0);
+        
+        gl.bindBuffer(gl.ARRAY_BUFFER, clockVertexColorBuffer);
+        gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, clockVertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
+        
+        gl.activeTexture(gl["TEXTURE"+textures.length]);
+        gl.bindTexture(gl.TEXTURE_2D, clockVertexTextureCoordBuffer.texture);
+        gl.uniform1i(shaderProgram.samplerUniform, textures.length);
+
+        gl.drawArrays(gl.TRIANGLE_FAN, 0, clockVertexPositionBuffer.clkcnt);
+        gl.bindTexture(gl.TEXTURE_2D, null)
+        gl.lineWidth(7)
+        gl.drawArrays(gl.LINES, clockVertexPositionBuffer.clkcnt, clockVertexPositionBuffer.handcnt);
+
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, treeVertexPositionBuffer);
+        gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, treeVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, treeVertexTextureCoordBuffer);
+        gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, treeVertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, treeVertexNormalVectorBuffer);
+        gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, treeVertexNormalVectorBuffer.itemSize, gl.FLOAT, false, 0, 0);
+        
+        gl.bindBuffer(gl.ARRAY_BUFFER, treeVertexColorBuffer);
+        gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, treeVertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+        gl.drawArrays(gl.LINES, 0, treeVertexPositionBuffer.numItems);
+
+    }
+
+    var clockVertexPositionBuffer = null;
+    var clockVertexTextureCoordBuffer = null;
+    var clockVertexNormalVectorBuffer = null;
+    var clockVertexColorBuffer = null;
+
+
+    function createClock() {
+        var vertex = [1.2, 1.7, 3.99];
+        var texture = [0.5, 0.5];
+        var normal = [0,0,-1];
+        var color = [0,0,0,1];
+        var frag = 20;
+        for(let i = 0; i < frag; i++) {
+            vertex.push(1.2 - 0.2 * Math.sin(i* 2*Math.PI/frag), 1.7 + 0.2 * Math.cos(i* 2*Math.PI/frag), 3.99);
+            texture.push(0.5+0.5*Math.sin(i* 2*Math.PI/frag),0.5+0.5*Math.cos(i* 2*Math.PI/frag));
+            normal.push(0.0,0.0,-1.0);
+            color.push(0,0,0,0);
+            vertex.push(1.2 - 0.2 * Math.sin((i+1)* 2*Math.PI/frag), 1.7 + 0.2 * Math.cos((i+1)* 2*Math.PI/frag), 3.99);
+            texture.push(0.5+0.5*Math.sin((i+1)* 2*Math.PI/frag),0.5+0.5*Math.cos((i+1)* 2*Math.PI/frag));
+            normal.push(0.0,0.0,-1.0);
+            color.push(0,0,0,0);
+        }
+        
+        var vertexCount = 6;
+        clockVertexPositionBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, clockVertexPositionBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([ ...vertex,
+            1.2, 1.7, 3.98,
+            1.2 -0.14*Math.sin(now.getSeconds()* 2*Math.PI/60), 1.7  + 0.14 * Math.cos(now.getSeconds()* 2*Math.PI/60), 3.98,
+            1.2, 1.7, 3.98,
+            1.2 -0.10*Math.sin(now.getMinutes()* 2*Math.PI/60), 1.7  + 0.10 * Math.cos(now.getMinutes()* 2*Math.PI/60), 3.98,
+            1.2, 1.7, 3.98,
+            1.2 -0.6*Math.sin(now.getHours()* 2*Math.PI/12), 1.7  + 0.6 * Math.cos(now.getHours()* 2*Math.PI/12), 3.98,
+        ]), gl.STATIC_DRAW);
+        clockVertexPositionBuffer.vertices = vertex;
+        clockVertexPositionBuffer.itemSize = 3;
+        clockVertexPositionBuffer.handcnt = vertexCount;
+        clockVertexPositionBuffer.clkcnt = 2*frag + 1;
+
+        clockVertexTextureCoordBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, clockVertexTextureCoordBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([ ...texture,
+            0.0, 0.0, 
+            0.0, 0.0, 
+            0.0, 0.0, 
+            0.0, 0.0, 
+            0.0, 0.0, 
+            0.0, 0.0
+        ]), gl.STATIC_DRAW);
+        clockVertexTextureCoordBuffer.itemSize = 2;
+        clockVertexTextureCoordBuffer.numItems = vertexCount;
+        clockVertexTextureCoordBuffer.texture = createTexture("clock.jpg");
+        
+        clockVertexNormalVectorBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, clockVertexNormalVectorBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([ ...normal,
+            0.0,0.0,-1.0, 
+            0.0,0.0,-1.0, 
+            0.0,0.0,-1.0, 
+            0.0,0.0,-1.0, 
+            0.0,0.0,-1.0, 
+            0.0,0.0,-1.0
+        ]), gl.STATIC_DRAW);
+        clockVertexNormalVectorBuffer.itemSize = 3;
+        clockVertexNormalVectorBuffer.numItems = vertexCount;
+
+        clockVertexColorBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, clockVertexColorBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([ ...color,
+            0,0,0,1, 
+            0,0,0,1, 
+            0,0,0,1, 
+            0,0,0,1, 
+            0,0,0,1, 
+            0,0,0,1
+        ]), gl.STATIC_DRAW);
+        clockVertexColorBuffer.itemSize = 4;
+        clockVertexColorBuffer.numItems = vertexCount;
+    }
+
+
+    var treeVertexPositionBuffer = null;
+    var treeVertexTextureCoordBuffer = null;
+    var treeVertexNormalVectorBuffer = null;
+    var treeVertexColorBuffer = null;
+    var treeP=[], treeT=[], treeN=[], treeC=[];
+
+    function createTree(x, z, height,angle,zarib) {
+        let vertex = [x,0,z,x,3*height,z];
+        let textures = [0,0,0,0];
+        let normals = [0,1,0, 0,1,0];
+        let colors = [0.156, 0.345, 0.196, 1.0,0.156, 0.345, 0.196, 1.0];
+        let ang = 0;
+        let y = 3 * height;
+        const growTree = (x, y, z, ang, iter, height) => {
+            angle = Math.PI/(Math.random()*5.5+2.5)
+            if (iter === 0 || ang > Math.PI/12*5 || ang < -Math.PI/12*5) return vertex;
+            if (iter>4){
+                if (ang > Math.PI/3 || ang < - Math.PI/3) {
+                    return vertex;
+                }
+            }
+            if (iter<3){
+                ang*=1.5;
+            }
+            if(iter==0){
+                return vertex;
+            }
+            let newAngle = ang + angle;
+            if(newAngle > Math.PI/2*3 || newAngle < - Math.PI/2*3) return vertex;
+            let newX = x + height * Math.sin(newAngle);
+            let newY = y + height * Math.cos(newAngle);
+            let newZ = z;
+            vertex.push(x,y,z,newX,newY,newZ);
+            textures.push(0,0,0,0)
+            normals.push(0,1,0, 0,1,0)
+            colors.push(0.156, 0.345, 0.196, 1.0,0.156, 0.345, 0.196, 1.0);
+            growTree(newX, newY, newZ, newAngle, iter - 1 , height * zarib);
+            newX = x;
+            newY = y + height * Math.cos(newAngle);
+            newZ = z + height * Math.sin(newAngle);
+            vertex.push(x,y,z,newX,newY,newZ);
+            textures.push(0,0,0,0)
+            normals.push(0,1,0, 0,1,0)
+            colors.push(0.156, 0.345, 0.196, 1.0,0.156, 0.345, 0.196, 1.0);
+            growTree(newX, newY, newZ,ang, iter -1 , height * zarib);
+            newAngle = ang - angle;
+            newX = x + height * Math.sin(newAngle);
+            newY = y + height * Math.cos(newAngle);
+            newZ = z;
+            vertex.push(x,y,z,newX,newY,newZ);
+            textures.push(0,0,0,0)
+            normals.push(0,1,0, 0,1,0)
+            colors.push(0.156, 0.345, 0.196, 1.0,0.156, 0.345, 0.196, 1.0);
+            growTree(newX, newY, newZ, newAngle, iter - 1 , height * zarib);
+            newX = x;
+            newY = y + height * Math.cos(newAngle);
+            newZ = z + height * Math.sin(newAngle);
+            vertex.push(x,y,z,newX,newY,newZ);
+            textures.push(0,0,0,0)
+            normals.push(0,1,0, 0,1,0)
+            colors.push(0.156, 0.345, 0.196, 1.0,0.156, 0.345, 0.196, 1.0);
+            growTree(newX, newY, newZ,ang, iter -1 , height * zarib);
+        };
+        growTree(x,y,z,ang, 6, height*zarib);
+        treeC = treeC.concat(colors)
+        treeN = treeN.concat(normals)
+        treeP = treeP.concat(vertex)
+        treeT = treeT.concat(textures)
+    }
+
+    function fillTrees() {
+        treeVertexPositionBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, treeVertexPositionBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(treeP), gl.STATIC_DRAW);
+        treeVertexPositionBuffer.itemSize = 3;
+        treeVertexPositionBuffer.numItems = treeP.length/3;
+
+        treeVertexTextureCoordBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, treeVertexTextureCoordBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(treeT), gl.STATIC_DRAW);
+        treeVertexTextureCoordBuffer.itemSize = 2;
+        treeVertexTextureCoordBuffer.numItems = treeT.length/2;
+
+        treeVertexNormalVectorBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, treeVertexNormalVectorBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(treeN), gl.STATIC_DRAW);
+        treeVertexNormalVectorBuffer.itemSize = 3;
+        treeVertexNormalVectorBuffer.numItems = treeN.length/3;
+
+        treeVertexColorBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, treeVertexColorBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(treeC), gl.STATIC_DRAW);
+        treeVertexColorBuffer.itemSize = 4;
+        treeVertexColorBuffer.numItems = treeC.length/4;
     }
 
 
     var lastTime = 0;
-    // Used to make us "jog" up and down as we move forward.
     var joggingAngle = 0;
 
     function animate() {
@@ -407,15 +709,16 @@
         if (lastTime != 0) {
             var elapsed = timeNow - lastTime;
 
-            if (speed != 0) {
-                xPos -= Math.sin(degToRad(yaw)) * speed * elapsed;
-                zPos -= Math.cos(degToRad(yaw)) * speed * elapsed;
+            if (speed != 0 || xSpeed!=0) {
+                xPos -= Math.sin(degToRad(yaw)) * speed * elapsed + Math.cos(degToRad(yaw)) * xSpeed * elapsed;
+                zPos -= Math.cos(degToRad(yaw)) * speed * elapsed - Math.sin(degToRad(yaw)) * xSpeed * elapsed;
 
-                joggingAngle += elapsed * 0.6; // 0.6 "fiddle factor" - makes it feel more realistic :-)
-                yPos = Math.sin(degToRad(joggingAngle)) / 20 + myHeight;
+                joggingAngle += elapsed * 0.6;
+                if(!isJumping) jumpStat = Math.sin(degToRad(joggingAngle)) / 20;
             }
 
             yaw += yawRate * elapsed;
+            centralYaw += yawRate * elapsed;
             pitch += pitchRate * elapsed;
 
         }
@@ -435,8 +738,18 @@
         initGL(canvas);
         initShaders();
         loadWorld();
+        createClock();
+        console.log('1')
+        for(let i = 0;i<50;i++) createTree(Math.random()*300+10,Math.random()*300+10,Math.random()+0.5, Math.PI/(Math.random()*5.5+2.5), 0.9);
+        console.log('2')        
+        fillTrees();
+        canvas.onmousemove = handleMouseMove;
 
-        gl.clearColor(0.0, 0.0, 0.0, 1.0);
+        gl.clearColor(30.0/256.0, 144.0/256.0, 255.0/256.0, 1.0);
+
+        // gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+        // gl.enable(gl.BLEND);
+        // gl.disable(gl.DEPTH_TEST);
         gl.enable(gl.DEPTH_TEST);
 
         document.onkeydown = handleKeyDown;
@@ -463,19 +776,7 @@
 
 
 <body onload="webGLStart();">
-    <a href="http://learningwebgl.com/blog/?p=1067">&lt;&lt; Back to Lesson 10</a><br />
-
-    <canvas id="lesson10-canvas" style="border: none;" width="1000" height="1000"></canvas>
-
-    <div id="loadingtext">Loading world...</div>
-
-    <br/>
-    Use the cursor keys or WASD to run around, and <code>Page Up</code>/<code>Page Down</code> to
-look up and down.
-
-    <br/>
-    <br/>
-    <a href="http://learningwebgl.com/blog/?p=1067">&lt;&lt; Back to Lesson 10</a>
+    <canvas id="lesson10-canvas" style="border: none;" width="1500" height="800"></canvas>
 </body>
 
 </html>
