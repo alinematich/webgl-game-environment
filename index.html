@@ -93,10 +93,10 @@
         }
     }
 
-    class MyTime{
+    class MyTime {
 
-        constructor() {
-            this.time = 0;
+        constructor(time) {
+            this.time = time;
             this.alert = new Audio("clock.wav")
         }
 
@@ -112,9 +112,10 @@
             return this.time/3600000
         }
 
-    } 
+    }
 
-    var now = new MyTime();
+    var date = new Date()
+    var now = new MyTime(date.getHours()*3600000+date.getMinutes()*60000+date.getSeconds()*1000);
 
     setInterval(()=> {
         now.time+=clockSpeed
@@ -515,6 +516,21 @@
         gl.bindTexture(gl.TEXTURE_2D, null)
         gl.drawArrays(gl.LINES, 0, treeVertexPositionBuffer.numItems);
 
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, grassVertexPositionBuffer);
+        gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, grassVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, grassVertexTextureCoordBuffer);
+        gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, grassVertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, grassVertexNormalVectorBuffer);
+        gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, grassVertexNormalVectorBuffer.itemSize, gl.FLOAT, false, 0, 0);
+        
+        gl.bindBuffer(gl.ARRAY_BUFFER, grassVertexColorBuffer);
+        gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, grassVertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
+        gl.bindTexture(gl.TEXTURE_2D, null)
+        gl.drawArrays(gl.LINES, 0, grassVertexPositionBuffer.numItems);
+
         for(let i = 0; i < toDraw.length; i+=5) {
             if(rotations[toDraw[i].world]) {
                 mvPushMatrix()
@@ -765,6 +781,59 @@
         treeVertexColorBuffer.numItems = treeC.length/4;
     }
 
+var grassVertexPositionBuffer = null;
+var grassVertexTextureCoordBuffer = null;
+var grassVertexNormalVectorBuffer = null;
+var grassVertexColorBuffer = null;
+
+function createGrass() {
+    var grassP=[], grassT=[], grassN=[], grassC=[];
+
+    let c = (x,z)=>{
+
+        let v0 = {x:(Math.random()-0.5)*5, y:Math.random()*5};
+        let d = 0.5;
+        let step = 0.05;
+
+        for(let t=step;t<100;t+=step){
+            if(v0.y - 9.8*t < 0)break;
+            if(v0.x*t>d || v0.x*t<-d)break;
+            grassP.push(x+ v0.x*(t-step),-0.5*9.8*(t-step)*(t-step) + v0.y*(t-step),z,x + v0.x*t, -0.5*9.8*t*t + v0.y*t,z);
+            grassT.push(0,0,0,0)
+            grassN.push(0,1,0, 0,1,0)
+            grassC.push(0.0, 1.0, 0.0, 1.0,0.0, 1.0, 0.0, 1.0);
+        }
+    }
+    for(let i=-50;i<50;i+=0.2){
+        for(let j=-50;j<-10;j+=0.2){
+            for(let x=0;x<5;x++) c(i,j)
+        }
+    }
+
+    grassVertexPositionBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, grassVertexPositionBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(grassP), gl.STATIC_DRAW);
+    grassVertexPositionBuffer.itemSize = 3;
+    grassVertexPositionBuffer.numItems = grassP.length/3;
+
+    grassVertexTextureCoordBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, grassVertexTextureCoordBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(grassT), gl.STATIC_DRAW);
+    grassVertexTextureCoordBuffer.itemSize = 2;
+    grassVertexTextureCoordBuffer.numItems = grassT.length/2;
+
+    grassVertexNormalVectorBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, grassVertexNormalVectorBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(grassN), gl.STATIC_DRAW);
+    grassVertexNormalVectorBuffer.itemSize = 3;
+    grassVertexNormalVectorBuffer.numItems = grassN.length/3;
+
+    grassVertexColorBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, grassVertexColorBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(grassC), gl.STATIC_DRAW);
+    grassVertexColorBuffer.itemSize = 4;
+    grassVertexColorBuffer.numItems = grassC.length/4;
+}
 
     var lastTime = 0;
     var joggingAngle = 0;
@@ -783,6 +852,9 @@
                 else if(xPos <= -0.25 && zPos >= -0.2 && zPos <= 4.2 && xPos + deltaX > -0.25) xPos = -0.25
                 else if(xPos <= 0.45 && zPos >= 0.95 && zPos <= 2.05 && xPos + deltaX > 0.45) xPos = 0.45
                 else if(xPos >= 1.55 && zPos >= 0.95 && zPos <= 2.05 && xPos + deltaX < 1.55) xPos = 1.55
+                else if(xPos <= 0.95 && zPos >= -0.2 && zPos <= 0.0 && xPos + deltaX > 0.95) xPos = 0.95
+                else if(xPos >= 2.15 && zPos >= 4.0 && zPos <= 4.2 && xPos + deltaX < 2.15) xPos = 2.15
+                else if(xPos <= 2.75 && zPos >= 4.0 && zPos <= 4.2 && xPos + deltaX > 2.75) xPos = 2.75
                 else xPos += deltaX;
                 if(zPos <= 0.95 && xPos >= 0.45 && xPos <= 1.55 && zPos + deltaZ > 0.95) zPos = 0.95
                 else if(zPos >= 2.05 && xPos >= 0.45 && xPos <= 1.55 && zPos + deltaZ < 2.05) zPos = 2.05
@@ -824,6 +896,7 @@
         loadWorld("window.txt", 0.6,1);
         createClock();
         for(let i = 0;i<50;i++) createTree((Math.random()-0.5)*300,0,Math.random()*-300-10,Math.random()+2.5, Math.PI/(Math.random()*5.5+2.5), 0.9);
+        createGrass();
         fillTrees();
         canvas.onmousemove = handleMouseMove;
 
