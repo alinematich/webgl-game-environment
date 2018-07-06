@@ -257,74 +257,6 @@
     function handleKeyDown(event) {
         // console.log (event.keyCode)
         currentlyPressedKeys[event.keyCode] = true;
-        
-
-        if(currentlyPressedKeys[90]){
-            let x = [
-                gl.ZERO,
-                gl.ONE,
-                gl.SRC_COLOR,
-                gl.ONE_MINUS_SRC_COLOR,
-                gl.DST_COLOR,
-                gl.ONE_MINUS_DST_COLOR,
-                gl.SRC_ALPHA,
-                gl.ONE_MINUS_SRC_ALPHA,
-                gl.DST_ALPHA,
-                gl.ONE_MINUS_DST_ALPHA,
-                gl.CONSTANT_COLOR,
-                gl.ONE_MINUS_CONSTANT_COLOR,
-                gl.CONSTANT_ALPHA,
-                gl.ONE_MINUS_CONSTANT_ALPHA,
-                gl.SRC_ALPHA_SATURATE
-            ]
-            gl.blendFunc(x[blending[0]], x[blending[1]]);
-            console.log(blending[0], blending[1])
-            if(blending[1] === 14){
-                if(blending[0] === 14) blending[0] = 0;
-                else blending[0]++;
-                blending[1] = 0;
-            } else {
-                blending[1]++;
-            }
-            gl.enable(gl.BLEND);
-            // gl.disable(gl.DEPTH_TEST);
-        }
-
-        // if(currentlyPressedKeys[88]){
-        //     let x = [
-        //         gl.ZERO,
-        //         gl.ONE,
-        //         gl.SRC_COLOR,
-        //         gl.ONE_MINUS_SRC_COLOR,
-        //         gl.DST_COLOR,
-        //         gl.ONE_MINUS_DST_COLOR,
-        //         gl.SRC_ALPHA,
-        //         gl.ONE_MINUS_SRC_ALPHA,
-        //         gl.DST_ALPHA,
-        //         gl.ONE_MINUS_DST_ALPHA,
-        //         gl.CONSTANT_COLOR,
-        //         gl.ONE_MINUS_CONSTANT_COLOR,
-        //         gl.CONSTANT_ALPHA,
-        //         gl.ONE_MINUS_CONSTANT_ALPHA,
-        //         gl.SRC_ALPHA_SATURATE
-        //     ]
-        //     gl.blendFunc(x[blending[0]], x[blending[1]]);
-        //     console.log(blending[0], blending[1])
-        //     if(blending[1] === 0){
-        //         if(blending[0] === 0) blending[0] = 14;
-        //         else blending[0]--;
-        //         blending[1] = 14;
-        //     } else {
-        //         blending[1]--;
-        //     }
-        //     gl.enable(gl.BLEND);
-        //     gl.disable(gl.DEPTH_TEST);
-        // }
-        if(currentlyPressedKeys[88]){
-            gl.disable(gl.BLEND);
-            gl.enable(gl.DEPTH_TEST);
-        }
-
     }
 
     function handleKeyUp(event) {
@@ -360,10 +292,10 @@
         }
 
         if (currentlyPressedKeys[37] || currentlyPressedKeys[65]) {
-            if(currentlyPressedKeys[16]) xSpeed = 0.006;
+            if(currentlyPressedKeys[16]) xSpeed = 0.009;
             else xSpeed = 0.003;
         } else if (currentlyPressedKeys[39] || currentlyPressedKeys[68]) {
-            if(currentlyPressedKeys[16]) xSpeed = -0.006;
+            if(currentlyPressedKeys[16]) xSpeed = -0.009;
             else xSpeed = -0.003;
         } else {
             xSpeed = 0;
@@ -375,10 +307,10 @@
         }else clockSpeed = 10;
 
         if (currentlyPressedKeys[38] || currentlyPressedKeys[87]) {
-            if(currentlyPressedKeys[16]) speed = 0.006;
+            if(currentlyPressedKeys[16]) speed = 0.009;
             else speed = 0.003;
         } else if (currentlyPressedKeys[40] || currentlyPressedKeys[83]) {
-            if(currentlyPressedKeys[16]) speed = -0.006;
+            if(currentlyPressedKeys[16]) speed = -0.009;
             else speed = -0.003;
         } else {
             speed = 0;
@@ -394,6 +326,7 @@
                     jumpStat = 0;
                     yPos = myHeight;
                     isJumping = false;
+                    return
                 }
                 jumpStat1 += 0.1;
                 jumpStat = Math.sin(jumpStat1);
@@ -401,6 +334,46 @@
             interval = setInterval(jump, 10);
         }
         
+        const degRate = 0.03;
+
+        function open(world, deg) {
+            if(!rotations[world]) rotations[world] = 0;
+            let interval;
+            interval = setInterval(()=>{
+                if(rotations[world] > deg) {
+                    clearInterval(interval);
+                    rotations[world] = deg;
+                    return
+                }
+                rotations[world] += degRate;
+            }, 10);
+        }
+
+        function close(world){
+            if(!rotations[world]) rotations[world] = 0;
+            let interval;
+            interval = setInterval(()=>{
+                if(rotations[world] < 0) {
+                    clearInterval(interval);
+                    rotations[world] = 0;
+                    return
+                }
+                rotations[world] -= degRate;
+            }, 10);
+        }
+        if(currentlyPressedKeys[79]) {
+            open('door.txt', 70)
+        }
+        if(currentlyPressedKeys[80]) {
+            close('door.txt')
+        }
+        if(currentlyPressedKeys[85]){
+            open('window.txt', 70)
+        }
+        if(currentlyPressedKeys[73]){
+            close('window.txt')
+        }
+                
         if(!isJumping){
         if(currentlyPressedKeys[67]){
             yPos = myHeight / 2;
@@ -423,27 +396,29 @@
     var worldVertexColorBuffer = null;
     var worldVertexTextureIndexes = null;
     var textures = [null];
-
+    var textureImages = [];
+    var rotations = {}
     
     var toDraw = [];
-    function handleLoadedWorld(data) {
+    function handleLoadedWorld(data, transparency, world, rotdir) {
         var lines = data.split("\n");
         var vertexCount = 0;
         var vertexPositions = [];
         var vertexTextureCoords = [];
         var vertexTextureIndexes = [];
-        var textureImages = [];
         var vertexNormals = [];
         var vertexColors = [];
+        var firstLine = null;
         for (var i in lines) {
             var vals = lines[i].replace(/^\s+/, "").split(/\s+/);
             if (vals.length >= 6 && vals[0] != "//") {
+                if(firstLine === null) firstLine = vals;
                 vertexPositions.push(parseFloat(vals[0]), parseFloat(vals[1]), parseFloat(vals[2]));
                 vertexNormals.push(parseFloat(vals[3]), parseFloat(vals[4]), parseFloat(vals[5]));
                 
                 if(vals[6] === "texture") {
                     var ind = textureImages.indexOf(vals[7])
-                    if(ind == -1){
+                    if(ind == -1) {
                         vertexTextureIndexes.push(textureImages.length+1)
                         textureImages.push(vals[7])
                         textures.push(createTexture(vals[7]))
@@ -452,54 +427,61 @@
                     }
                     
                     vertexTextureCoords.push(parseFloat(vals[8]), parseFloat(vals[9]));
-                    vertexColors.push(0,0,0,1)
+                    vertexColors.push(0,0,0,transparency)
 
                 } else if(vals[6] === "color") {
                     vertexTextureIndexes.push(0);
                     vertexTextureCoords.push(0,0);
-                    vertexColors.push(parseFloat(vals[7])/256, parseFloat(vals[8])/256, parseFloat(vals[9])/256, parseFloat(vals[10]))
+                    vertexColors.push(parseFloat(vals[7])/256, parseFloat(vals[8])/256, parseFloat(vals[9])/256, parseFloat(vals[10])*transparency)
                 }
 
                 vertexCount += 1;
             }
         }
 
-        worldVertexPositionBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, worldVertexPositionBuffer);
+        let buffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexPositions), gl.STATIC_DRAW);
-        worldVertexPositionBuffer.itemSize = 3;
-        worldVertexPositionBuffer.numItems = vertexCount;
+        buffer.itemSize = 3;
+        buffer.numItems = vertexCount;
+        buffer.world= world;
+        buffer.pos = [parseFloat(firstLine[0]), parseFloat(firstLine[1]), parseFloat(firstLine[2])];
+        buffer.rotdir = rotdir
+        toDraw.push(buffer);
 
-        worldVertexTextureCoordBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, worldVertexTextureCoordBuffer);
+        buffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexTextureCoords), gl.STATIC_DRAW);
-        worldVertexTextureCoordBuffer.itemSize = 2;
-        worldVertexTextureCoordBuffer.numItems = vertexCount;
+        buffer.itemSize = 2;
+        buffer.numItems = vertexCount;
+        toDraw.push(buffer);
 
-        worldVertexNormalVectorBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, worldVertexNormalVectorBuffer);
+        buffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexNormals), gl.STATIC_DRAW);
-        worldVertexNormalVectorBuffer.itemSize = 3;
-        worldVertexNormalVectorBuffer.numItems = vertexCount;
+        buffer.itemSize = 3;
+        buffer.numItems = vertexCount;
+        toDraw.push(buffer);
 
-        worldVertexColorBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, worldVertexColorBuffer);
+        buffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexColors), gl.STATIC_DRAW);
-        worldVertexColorBuffer.itemSize = 4;
-        worldVertexColorBuffer.numItems = vertexCount;
-
-        worldVertexTextureIndexes = vertexTextureIndexes;
+        buffer.itemSize = 4;
+        buffer.numItems = vertexCount;
+        toDraw.push(buffer);
+        
+        toDraw.push(vertexTextureIndexes);
 
     }
 
 
 
-    function loadWorld(world, transparency) {
+    function loadWorld(world, transparency, rotdir) {
         var request = new XMLHttpRequest();
-        request.open("GET");
+        request.open("GET", world);
         request.onreadystatechange = function () {
             if (request.readyState == 4) {
-                handleLoadedWorld(request.responseText, transparency);
+                handleLoadedWorld(request.responseText, transparency, world, rotdir);
             }
         }
         request.send();
@@ -511,10 +493,6 @@
         gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-        if (worldVertexTextureCoordBuffer == null || worldVertexPositionBuffer == null) {
-            return;
-        }
-
         mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.01, 250.0, pMatrix);
 
         mat4.identity(mvMatrix);
@@ -523,33 +501,60 @@
         mat4.rotate(mvMatrix, degToRad(-yaw), [0, 1, 0]);
         mat4.translate(mvMatrix, [-xPos, -yPos - jumpStat, -zPos]);
         
+        gl.bindBuffer(gl.ARRAY_BUFFER, treeVertexPositionBuffer);
+        gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, treeVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, treeVertexTextureCoordBuffer);
+        gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, treeVertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, treeVertexNormalVectorBuffer);
+        gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, treeVertexNormalVectorBuffer.itemSize, gl.FLOAT, false, 0, 0);
         
-        gl.bindBuffer(gl.ARRAY_BUFFER, worldVertexTextureCoordBuffer);
-        gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, worldVertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
+        gl.bindBuffer(gl.ARRAY_BUFFER, treeVertexColorBuffer);
+        gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, treeVertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
+        gl.bindTexture(gl.TEXTURE_2D, null)
+        gl.drawArrays(gl.LINES, 0, treeVertexPositionBuffer.numItems);
 
-        gl.bindBuffer(gl.ARRAY_BUFFER, worldVertexPositionBuffer);
-        gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, worldVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+        for(let i = 0; i < toDraw.length; i+=5) {
+            if(rotations[toDraw[i].world]) {
+                mvPushMatrix()
+                mat4.translate(mvMatrix, [toDraw[i].pos[0],toDraw[i].pos[1],toDraw[i].pos[2]])
+                mat4.rotate(mvMatrix, degToRad(toDraw[i].rotdir * rotations[toDraw[i].world]), [0, 1, 0]);
+                mat4.translate(mvMatrix, [-toDraw[i].pos[0],-toDraw[i].pos[1],-toDraw[i].pos[2]])
+            }
+            gl.bindBuffer(gl.ARRAY_BUFFER, toDraw[i+1]);
+            gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, toDraw[i+1].itemSize, gl.FLOAT, false, 0, 0);
 
-        gl.bindBuffer(gl.ARRAY_BUFFER, worldVertexNormalVectorBuffer);
-        gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, worldVertexNormalVectorBuffer.itemSize, gl.FLOAT, false, 0, 0);
-        
-        gl.bindBuffer(gl.ARRAY_BUFFER, worldVertexColorBuffer);
-        gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, worldVertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
+            gl.bindBuffer(gl.ARRAY_BUFFER, toDraw[i]);
+            gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, toDraw[i].itemSize, gl.FLOAT, false, 0, 0);
 
-        setMatrixUniforms();
-        for(let i = 0; i < worldVertexPositionBuffer.numItems; i++){
+            gl.bindBuffer(gl.ARRAY_BUFFER, toDraw[i+2]);
+            gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, toDraw[i+2].itemSize, gl.FLOAT, false, 0, 0);
+            
+            gl.bindBuffer(gl.ARRAY_BUFFER, toDraw[i+3]);
+            gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, toDraw[i+3].itemSize, gl.FLOAT, false, 0, 0);
 
-            let sameTexture = 0;
-            for(;sameTexture < worldVertexPositionBuffer.numItems-i && worldVertexTextureIndexes[i] === worldVertexTextureIndexes[i+sameTexture]; sameTexture++);
+            setMatrixUniforms();
+            for(let j = 0; j < toDraw[i].numItems; j++){
+                
+                let sameTexture = 0;
+                for(;sameTexture < toDraw[i].numItems-j && toDraw[i+4][j] === toDraw[i+4][j+sameTexture]; sameTexture++);
 
-            gl.activeTexture(gl["TEXTURE"+worldVertexTextureIndexes[i]]);
-            gl.bindTexture(gl.TEXTURE_2D, textures[worldVertexTextureIndexes[i]]);
-            gl.uniform1i(shaderProgram.samplerUniform, worldVertexTextureIndexes[i]);
+                gl.activeTexture(gl["TEXTURE"+toDraw[i+4][j]]);
+                gl.bindTexture(gl.TEXTURE_2D, textures[toDraw[i+4][j]]);
+                gl.uniform1i(shaderProgram.samplerUniform, toDraw[i+4][j]);
 
-            gl.drawArrays(gl.TRIANGLES, i, sameTexture);
-            i += sameTexture - 1;
+                gl.drawArrays(gl.TRIANGLES, j, sameTexture);
+                j += sameTexture - 1;
+            }
+
+            if(rotations[toDraw[i].world]) {
+                mvPopMatrix()
+            }
+
+
         }
-
+        setMatrixUniforms();
         gl.bindBuffer(gl.ARRAY_BUFFER, clockVertexPositionBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([ ...clockVertexPositionBuffer.vertices,
             1.2, 1.7, 3.98,
@@ -580,19 +585,6 @@
         gl.drawArrays(gl.LINES, clockVertexPositionBuffer.clkcnt, clockVertexPositionBuffer.handcnt);
 
 
-        gl.bindBuffer(gl.ARRAY_BUFFER, treeVertexPositionBuffer);
-        gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, treeVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
-        gl.bindBuffer(gl.ARRAY_BUFFER, treeVertexTextureCoordBuffer);
-        gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, treeVertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
-        gl.bindBuffer(gl.ARRAY_BUFFER, treeVertexNormalVectorBuffer);
-        gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, treeVertexNormalVectorBuffer.itemSize, gl.FLOAT, false, 0, 0);
-        
-        gl.bindBuffer(gl.ARRAY_BUFFER, treeVertexColorBuffer);
-        gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, treeVertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
-        gl.drawArrays(gl.LINES, 0, treeVertexPositionBuffer.numItems);
 
     }
 
@@ -614,7 +606,7 @@
             normal.push(0.0,0.0,-1.0);
             color.push(0,0,0,1);
             vertex.push(1.2 - 0.2 * Math.sin((i+1)* 2*Math.PI/frag), 1.7 + 0.2 * Math.cos((i+1)* 2*Math.PI/frag), 3.99);
-            texture.push(0.5+0.5*Math.sin((i+1)* 2*Math.PI/frag),0.5+0.5*Math.cos((i+1)* 2*Math.PI/frag));
+            texture.push(0.5+0.5 * Math.sin((i+1)* 2*Math.PI/frag),0.5+0.5*Math.cos((i+1)* 2*Math.PI/frag));
             normal.push(0.0,0.0,-1.0);
             color.push(0,0,0,1);
         }
@@ -683,13 +675,13 @@
     var treeVertexColorBuffer = null;
     var treeP=[], treeT=[], treeN=[], treeC=[];
 
-    function createTree(x, z, height,angle,zarib) {
-        let vertex = [x,0,z,x,3*height,z];
+    function createTree(x, y, z, height,angle,zarib) {
+        let vertex = [x,y,z,x,y+3*height,z];
         let textures = [0,0,0,0];
         let normals = [0,1,0, 0,1,0];
         let colors = [0.156, 0.345, 0.196, 1.0,0.156, 0.345, 0.196, 1.0];
         let ang = 0;
-        let y = 3 * height;
+        y = y+3 * height;
         const growTree = (x, y, z, ang, iter, height) => {
             angle = Math.PI/(Math.random()*5.5+2.5)
             if (iter === 0 || ang > Math.PI/12*5 || ang < -Math.PI/12*5) return vertex;
@@ -783,9 +775,26 @@
             var elapsed = timeNow - lastTime;
 
             if (speed != 0 || xSpeed!=0) {
-                xPos -= Math.sin(degToRad(yaw)) * speed * elapsed + Math.cos(degToRad(yaw)) * xSpeed * elapsed;
-                zPos -= Math.cos(degToRad(yaw)) * speed * elapsed - Math.sin(degToRad(yaw)) * xSpeed * elapsed;
-
+                let deltaX = -Math.sin(degToRad(yaw)) * speed * elapsed - Math.cos(degToRad(yaw)) * xSpeed * elapsed;
+                let deltaZ = -Math.cos(degToRad(yaw)) * speed * elapsed + Math.sin(degToRad(yaw)) * xSpeed * elapsed;
+                if(xPos >= 0.05 && zPos >= -0.2 && zPos <= 4.2 && xPos + deltaX < 0.05) xPos = 0.05
+                else if(xPos >= 3.25 && zPos >= -0.2 && zPos <= 4.2 && xPos + deltaX < 3.25) xPos = 3.25
+                else if(xPos <= 2.95 && zPos >= -0.2 && zPos <= 4.2 && xPos + deltaX > 2.95) xPos = 2.95
+                else if(xPos <= -0.25 && zPos >= -0.2 && zPos <= 4.2 && xPos + deltaX > -0.25) xPos = -0.25
+                else if(xPos <= 0.45 && zPos >= 0.95 && zPos <= 2.05 && xPos + deltaX > 0.45) xPos = 0.45
+                else if(xPos >= 1.55 && zPos >= 0.95 && zPos <= 2.05 && xPos + deltaX < 1.55) xPos = 1.55
+                else xPos += deltaX;
+                if(zPos <= 0.95 && xPos >= 0.45 && xPos <= 1.55 && zPos + deltaZ > 0.95) zPos = 0.95
+                else if(zPos >= 2.05 && xPos >= 0.45 && xPos <= 1.55 && zPos + deltaZ < 2.05) zPos = 2.05
+                else if(rotations["window.txt"] > 20 && zPos >= 0.05 && xPos >= 0.0 && xPos <= 1.0 && zPos + deltaZ < 0.05) zPos += deltaZ
+                else if(rotations["window.txt"] > 20 && zPos <= -0.25 && xPos >= 0.0 && xPos <= 1.0 && zPos + deltaZ > -0.25) zPos += deltaZ
+                else if(rotations["door.txt"] > 20 && zPos <= 3.95 && xPos >= 2.1 && xPos <= 2.8 && zPos + deltaZ > 3.95) zPos += deltaZ
+                else if(rotations["door.txt"] > 20 && zPos >= 4.25 && xPos >= 2.1 && xPos <= 2.8 && zPos + deltaZ < 4.25) zPos += deltaZ
+                else if(zPos >= 0.05 && xPos >= -0.2 && xPos <= 3.2 && zPos + deltaZ < 0.05) zPos = 0.05
+                else if(zPos <= 3.95 && xPos >= -0.2 && xPos <= 3.2 && zPos + deltaZ > 3.95) zPos = 3.95
+                else if(zPos <= -0.25 && xPos >= -0.2 && xPos <= 3.2 && zPos + deltaZ > -0.25) zPos = -0.25
+                else if(zPos >= 4.25 && xPos >= -0.2 && xPos <= 3.2 && zPos + deltaZ < 4.25) zPos = 4.25
+                else zPos += deltaZ;
                 joggingAngle += elapsed * 0.6;
                 if(!isJumping) jumpStat = Math.sin(degToRad(joggingAngle)) / 20;
             }
@@ -811,21 +820,23 @@
         initGL(canvas);
         initShaders();
         loadWorld("myworld.txt", 1);
-        loadWorld("door.txt", 1);
-        loadWorld("window.txt", 0.6);
+        loadWorld("door.txt", 1,-1);
+        loadWorld("window.txt", 0.6,1);
         createClock();
-        for(let i = 0;i<50;i++) createTree(Math.random()*300+10,Math.random()*300+10,Math.random()+0.5, Math.PI/(Math.random()*5.5+2.5), 0.9);
+        for(let i = 0;i<50;i++) createTree((Math.random()-0.5)*300,0,Math.random()*-300-10,Math.random()+2.5, Math.PI/(Math.random()*5.5+2.5), 0.9);
         fillTrees();
         canvas.onmousemove = handleMouseMove;
 
         gl.clearColor(30.0/256.0, 144.0/256.0, 255.0/256.0, 1.0);
-
+        
+        gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
         gl.enable(gl.DEPTH_TEST);
+        gl.enable(gl.BLEND)
 
         document.onkeydown = handleKeyDown;
         document.onkeyup = handleKeyUp;
 
-        tick();
+        setTimeout(tick, 100)
     }
 
 </script>
@@ -847,6 +858,12 @@
 
 <body onload="webGLStart();">
     <canvas id="lesson10-canvas" style="border: none;" width="1500" height="800"></canvas>
+
+    <br/>QWEASD : move<br/>
+    space C: action<br/>
+    shift: run<br/>
+    UIOP: open and close doors
+    F va SHIFT+F: fast clock
 </body>
 
 </html>
