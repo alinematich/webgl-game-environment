@@ -60,6 +60,7 @@
     uniform mat4 uMVMatrix;
     uniform mat4 uPMatrix;
     uniform mat3 uNMatrix;
+    
 
     varying vec2 vTextureCoord;
     varying vec3 vTransformedNormal;
@@ -909,7 +910,7 @@ function createGrass() {
         document.onkeydown = handleKeyDown;
         document.onkeyup = handleKeyUp;
 
-        setTimeout(tick, 100)
+        tick()
     }
 
 </script>
